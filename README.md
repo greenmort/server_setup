@@ -12,8 +12,7 @@ sudo apt install shadowsocks-libev
 
 
 ### на клиенте
-```
-{
+```{
     "server":"server-ip",
     "mode":"tcp_and_udp",
     "server_port":443,
@@ -27,8 +26,7 @@ sudo apt install shadowsocks-libev
     "nameserver":"1.1.1.1"
 }```
 
-```
-#!/bin/bash
+```#!/bin/bash
 
 start_ssredir() {
     # please modify MyIP, MyPort, etc.
@@ -166,6 +164,5 @@ main() {
     done
     return 0
 }
-main "$@"
-```
+main "$@"```
     
