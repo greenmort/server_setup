@@ -47,8 +47,8 @@ start_iptables() {
 
     # please modify MyIP, MyPort, etc.
     # ignore traffic sent to ss-server
-    iptables -t mangle -A SSREDIR -p tcp -d 46.166.163.211 --dport 443 -j RETURN
-    iptables -t mangle -A SSREDIR -p udp -d 46.166.163.211 --dport 443 -j RETURN
+    iptables -t mangle -A SSREDIR -p tcp -d server-ip --dport 443 -j RETURN
+    iptables -t mangle -A SSREDIR -p udp -d server-ip --dport 443 -j RETURN
 
     # ignore traffic sent to reserved addresses
     iptables -t mangle -A SSREDIR -d 0.0.0.0/8          -j RETURN
