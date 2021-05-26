@@ -19,7 +19,8 @@ sudo sysctl-p
 
 Правим /etc/ufw/before.rules до таблицы *filter
 
- ```*nat
+ ```
+ *nat
 -A POSTROUTING -o eth0 -j MASQUERADE 
 COMMIT
 ```
