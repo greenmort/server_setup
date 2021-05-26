@@ -12,6 +12,18 @@ sudo apt install shadowsocks-libev
 
 
 ### на клиенте
+##### разрешаем форвардинг пакетов
+```sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+sudo sysctl-p
+```
+
+Правим /etc/ufw/before.rules до таблицы *filter
+
+ ```*nat
+-A POSTROUTING -o eth0 -j MASQUERADE 
+COMMIT
+```
+
 ```{
     "server":"server-ip",
     "mode":"tcp_and_udp",
