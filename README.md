@@ -32,8 +32,15 @@ sudo sysctl-p
 -A POSTROUTING -o eth0 -j MASQUERADE 
 COMMIT
 ```
+Правим дефолтную политику в отношении форвардинга пакетов:
+```
+sudo vim /etc/default/ufw
 
-```{
+DEFAULT_FORWARD_POLICY="ACCEPT"
+```
+
+```
+{
     "server":"server-ip",
     "mode":"tcp_and_udp",
     "server_port":443,
