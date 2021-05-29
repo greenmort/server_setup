@@ -54,7 +54,8 @@ DEFAULT_FORWARD_POLICY="ACCEPT"
     "nameserver":"1.1.1.1"
 }```
 
-```#!/bin/bash
+```
+#!/bin/bash
 
 start_ssredir() {
     # please modify MyIP, MyPort, etc.
@@ -192,5 +193,6 @@ main() {
     done
     return 0
 }
-main "$@"```
+main "$@"
+```
     
