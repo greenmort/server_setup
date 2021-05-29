@@ -4,6 +4,7 @@
 Выполняется как обычно. В файерволле пока оставляем открытым только 22/tcp 
 Настраиваем Iptables для предотвращения брутфорса
 ```
+iptables -A INPUT -m state --state NEW,ESTABLISHED,RELATED --source x.x.x.x -p tcp --dport 22 -j ACCEPT
 sudo iptables -A INPUT -p tcp --dport 22 -m state --state NEW -m recent --set --name SSH -j ACCEPT
 sudo iptables -A INPUT -p tcp --dport 22 -m recent --update --seconds 60 --hitcount 4 --rttl --name SSH -j LOG --log-prefix "SSH_brute_force "
 sudo iptables -A INPUT -p tcp --dport 22 -m recent --update --seconds 60 --hitcount 4 --rttl --name SSH -j DROP
