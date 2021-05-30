@@ -146,7 +146,7 @@ DEFAULT_FORWARD_POLICY="ACCEPT"
     "timeout":60,
     "method":"aes-256-gcm",
     "plugin":"/etc/shadowsocks-libev/v2ray-plugin",
-    "plugin_opts":"tls;host=hostname.dn",
+    "plugin_opts":"tls;host=hostname.dn;fast-open",
     "fast_open":true,
     "nameserver":"1.1.1.1"
 }
