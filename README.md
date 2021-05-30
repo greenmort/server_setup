@@ -65,6 +65,7 @@ sudo iptables -A INPUT -p tcp --dport 22 -m recent --update --seconds 60 --hitco
 ```
 sudo ufw allow 22/tcp
 sudo ufw allow 443
+sudo ufw allow 58712/udp
 sudo ufw reload
 ```
 
@@ -295,4 +296,74 @@ main() {
 main "$@"
 ```
 ### Установка и настройка wireguard
+#### На сервере
+```
+sudo apt install wireguard
+```
+Создаем ключи для сервера и всех клиентов
+```
+wg genkey | sudo tee server_private.key | wg pubkey | sudo tee server_public.key
+wg genkey | sudo tee client1_private.key | wg pubkey | sudo tee client1_public.key
+```
 
+Создаем конфигурационный файл сервера
+```
+sudo vim /etc/wireguard/wg0.conf
+```
+```
+[Interface]
+Address = 10.66.66.1/24
+Address = fd42:42:42::1/64
+SaveConfig = true
+PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE; ip6tables -A FORWARD -i wg0 -j ACCEPT; ip6tables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE; ip6tables -D FORWARD -i wg0 -j ACCEPT; ip6tables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+ListenPort = 58712
+PrivateKey = PrivateKey
+
+[Peer] 
+#gateway
+PublicKey = PublicKey
+AllowedIPs = 10.66.66.64/26, fd42:42:42::/120
+
+[Peer] 
+#client1
+PublicKey = PublicKey
+AllowedIPs = 10.66.66.10/32, fd42:42:42::10/128
+
+[Peer] 
+#client2
+PublicKey = PublicKey
+AllowedIPs = 10.66.66.11/32, fd42:42:42::11/128
+```
+Все готово, осталось сделать 
+```
+sudo wg-quick up wg0
+```
+
+#### На клиенте
+
+```
+sudo apt install wireguard
+```
+Создаем конфигурационный файл клиента
+```
+sudo vim /etc/wireguard/wg0.conf
+```
+
+```
+[Interface]
+PrivateKey = PrivateKey
+Address = 10.66.66.64/26
+PostUp = iptables -t nat -A POSTROUTING -o wg0 -j MASQUERADE; iptables -A FORWARD -i eth0 -o wg0 -j ACCEPT; iptables -A FORWARD -i wg0 -m state --state RELATED,ESTABLISHED -j ACCEPT; iptables -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+PostDown = iptables -t nat -D POSTROUTING -o wg0 -j MASQUERADE; iptables -D FORWARD -i eth0 -o wg0 -j ACCEPT; iptables -D FORWARD -i wg0 -m state --state RELATED,ESTABLISHED -j ACCEPT; iptables -D FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+
+[Peer]
+PublicKey = PublicKey
+Endpoint = server-ip:58712
+AllowedIPs = 0.0.0.0/0
+PersistentKeepalive = 15
+```
+Все готово, осталось сделать 
+```
+sudo wg-quick up wg0
+```
