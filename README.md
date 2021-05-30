@@ -152,7 +152,8 @@ DEFAULT_FORWARD_POLICY="ACCEPT"
 
 Скрипт для ss-redirect (используем для теста, в продакшене будет крутиться ss-tunnel)
 
-```#!/bin/bash
+```
+#!/bin/bash
 
 start_ssredir() {
     # please modify MyIP, MyPort, etc.
