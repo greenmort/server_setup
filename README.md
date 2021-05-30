@@ -148,7 +148,8 @@ DEFAULT_FORWARD_POLICY="ACCEPT"
     "plugin_opts":"tls;host=hostname.dn",
     "fast_open":true,
     "nameserver":"1.1.1.1"
-}```
+}
+```
 
 Скрипт для ss-redirect (используем для теста, в продакшене будет крутиться ss-tunnel)
 
