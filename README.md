@@ -1,7 +1,59 @@
 # server_setup
 ### Первичная настройка сервера
 
-Выполняется как обычно. В файерволле пока оставляем открытым только 22/tcp 
+Выполняется как обычно. 
+ ```
+ apt update
+ apt upgrade -y
+ 
+ groupadd username
+ useradd -m -g users -G username,audio,video,sudo -s /bin/bash username
+ mkdir /home/username/.ssh
+ touch /home/username/.ssh/authorized_keys
+ 
+ vim /etc/ssh/sshd_config
+ 
+ PasswordAuthentication no
+ PubkeyAuthentication yes
+ PermitRootLogin no
+ 
+ systemctl restart sshd.service
+ 
+ su username
+ ```
+
+Настраиваем перенаправление пакетов на уровне ядра:
+```
+fs.file-max = 51200
+
+net.core.rmem_max = 67108864
+net.core.wmem_max = 67108864
+net.core.netdev_max_backlog = 250000
+net.core.somaxconn = 4096
+
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_tw_reuse = 1
+net.ipv4.tcp_tw_recycle = 0
+net.ipv4.tcp_fin_timeout = 30
+net.ipv4.tcp_keepalive_time = 1200
+net.ipv4.ip_local_port_range = 10000 65000
+net.ipv4.tcp_max_syn_backlog = 8192
+net.ipv4.tcp_max_tw_buckets = 5000
+net.ipv4.tcp_fastopen = 3
+net.ipv4.tcp_mem = 25600 51200 102400
+net.ipv4.tcp_rmem = 4096 87380 67108864
+net.ipv4.tcp_wmem = 4096 65536 67108864
+net.ipv4.tcp_mtu_probing = 1
+net.ipv4.tcp_congestion_control = hybla
+net.ipv4.ip_forward = 1
+net.ipv6.conf.default.forwarding = 1
+net.ipv6.conf.all.forwarding = 1
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.proxy_arp = 0
+net.ipv4.conf.default.send_redirects = 1
+net.ipv4.conf.all.send_redirects = 0
+```
+
 Настраиваем Iptables для предотвращения брутфорса
 ```
 iptables -A INPUT -m state --state NEW,ESTABLISHED,RELATED --source x.x.x.x -p tcp --dport 22 -j ACCEPT
@@ -16,13 +68,50 @@ sudo ufw allow 443
 sudo ufw reload
 ```
 
-### Установка и настройка shadowsocks
+### Установка и настройка shadowsocks + v2ray-plugin
 #### На сервере
  ```
 sudo apt update
 sudo apt install shadowsocks-libev
 ```
+Скачиваем и распаковываем последний релиз v2ray-plugin (проверить архитектуру!)
+```
+cd /etc/shadowsocks-libev
+sudo wget https://github.com/shadowsocks/v2ray-plugin/releases/download/v1.3.1/v2ray-plugin-linux-{%%architecture%%}-v1.3.1.tar.gz
+sudo tar xzvf v2ray-plugin-linux-{%%architecture%%}-v1.3.1.tar.gz
+```
+регистрируем доменное имя mydomain.me, указываем сервера имен с cloudflare
+в аккаунте cloudflare прописываем @ - ip address
+выпускаем tls-сертификаты
+ ```
+git clone https://github.com/acmesh-official/acme.sh.git
+cd ./acme.sh
+./acme.sh --install 
 
+~/.acme.sh/acme.sh --issue --dns dns_cf -d mydomain.me
+```
+правим конфигаруционный файл shadowsocks:
+```
+sudo vim /etc/shadowsocks-libev/config.json
+
+{
+    "server":"0.0.0.0",
+    "mode":"tcp_and_udp",
+    "server_port":443,
+    "password":"****",
+    "timeout":60,
+    "fast_open":true,
+    "port_reuse":true,
+    "plugin":"/etc/shadowsocks-libev/v2ray-plugin",
+    "plugin_opts":"server;tls;host=mydomain.me;cert=/home/green/.acme.sh/mydomain.me/fullchain.cer;key=/home/green/.acme.sh/mydomain.me/mydomain.me.key;fast-open",
+    "method":"aes-256-gcm",
+    "nameserver":"1.1.1.1"
+}
+```
+выполняем 
+```
+sudo ss-server -c /etc/shadowsocks-libev/config.json
+```
 
 ### на клиенте
 ##### разрешаем форвардинг пакетов
@@ -51,9 +140,9 @@ DEFAULT_FORWARD_POLICY="ACCEPT"
     "mode":"tcp_and_udp",
     "server_port":443,
     "local_port":1080,
-    "password":"81ECMbcg6ZBY",
+    "password":"****",
     "timeout":60,
-    "method":"aes-256-cfb",
+    "method":"aes-256-gcm",
     "plugin":"/etc/shadowsocks-libev/v2ray-plugin",
     "plugin_opts":"tls;host=hostname.dn",
     "fast_open":true,
