@@ -9,6 +9,12 @@ sudo iptables -A INPUT -p tcp --dport 22 -m state --state NEW -m recent --set --
 sudo iptables -A INPUT -p tcp --dport 22 -m recent --update --seconds 60 --hitcount 4 --rttl --name SSH -j LOG --log-prefix "SSH_brute_force "
 sudo iptables -A INPUT -p tcp --dport 22 -m recent --update --seconds 60 --hitcount 4 --rttl --name SSH -j DROP
 ```
+Настраиваем UFW:
+```
+sudo ufw allow 22/tcp
+sudo ufw allow 443
+sudo ufw reload
+```
 
 ### Установка и настройка shadowsocks
 #### На сервере
