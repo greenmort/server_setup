@@ -103,7 +103,7 @@ sudo vim /etc/shadowsocks-libev/config.json
     "fast_open":true,
     "port_reuse":true,
     "plugin":"/etc/shadowsocks-libev/v2ray-plugin",
-    "plugin_opts":"server;tls;host=mydomain.me;cert=/home/green/.acme.sh/mydomain.me/fullchain.cer;key=/home/green/.acme.sh/mydomain.me/mydomain.me.key;fast-open",
+    "plugin_opts":"server;tls;host=mydomain.me;cert=/home/username/.acme.sh/mydomain.me/fullchain.cer;key=/home/username/.acme.sh/mydomain.me/mydomain.me.key;fast-open",
     "method":"aes-256-gcm",
     "nameserver":"1.1.1.1"
 }
@@ -113,7 +113,7 @@ sudo vim /etc/shadowsocks-libev/config.json
 sudo ss-server -c /etc/shadowsocks-libev/config.json
 ```
 
-### на клиенте
+#### на клиенте
 ##### разрешаем форвардинг пакетов
 ```
 sudo echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
@@ -134,6 +134,7 @@ sudo vim /etc/default/ufw
 DEFAULT_FORWARD_POLICY="ACCEPT"
 ```
 
+Конфигурационный файл клиента:
 ```
 {
     "server":"server-ip",
@@ -148,6 +149,8 @@ DEFAULT_FORWARD_POLICY="ACCEPT"
     "fast_open":true,
     "nameserver":"1.1.1.1"
 }```
+
+Скрипт для ss-redirect (используем для теста, в продакшене будет крутиться ss-tunnel)
 
 ```#!/bin/bash
 
@@ -287,5 +290,7 @@ main() {
     done
     return 0
 }
-main "$@"```
-    
+main "$@"
+```
+### Установка и настройка wireguard
+
